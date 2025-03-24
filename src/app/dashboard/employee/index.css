@@ -1,0 +1,11 @@
+.column-scroll-style::-webkit-scrollbar {
+    width: 4px;
+}
+
+.column-scroll-style::-webkit-scrollbar:horizontal {
+    height: 8px;
+}
+
+.column-scroll-style::-webkit-scrollbar-thumb:vertical {
+    @apply bg-stone-700 rounded-xl dark:bg-stone-300;
+}

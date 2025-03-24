@@ -1,0 +1,6 @@
+#logo-v3 {
+    width: 450px;
+    height: 90px;
+    background: url("../../../assets/onologo.png") no-repeat center center;
+    background-size: contain;
+}
