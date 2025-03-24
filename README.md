@@ -34,7 +34,7 @@ Make sure you have the following installed:
 ### Clone the Repository
 
 ```sh
-git clone https://github.com/yourusername/real-estate-frontend.git
+git clone git@github.com:OmarAlkadri/EmlakJetX-frontend.git
 cd real-estate-frontend
 ```
 

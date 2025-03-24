@@ -38,7 +38,7 @@ const ListingCard: React.FC<ListingCardProps> = ({ listingCard }) => {
       <div className="flex flex-col h-full w-[255.85px] duration-500 hover:scale-105 hover:shadow-xl">
         <div className="flex items-center h-[143px] justify-center group backdrop-opacity-100">
           <img
-            src={"https://images.unsplash.com/photo-1505740420928-5e560c06d30e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NzEyNjZ8MHwxfHNlYXJjaHwxfHxoZWFkcGhvbmV8ZW58MHwwfHx8MTcyMTMwMzY5MHww&ixlib=rb-4.0.3&q=80&w=1080" ?? listingCard.images[0]}
+            src={listingCard.images?.[0] ?? "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NzEyNjZ8MHwxfHNlYXJjaHwxfHxoZWFkcGhvbmV8ZW58MHwwfHx8MTcyMTMwMzY5MHww&ixlib=rb-4.0.3&q=80&w=1080"}
             alt="image"
             className="relative w-full h-[143px] object-cover"
           />
