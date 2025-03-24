@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { logout } from '@/app/api/auth/logout';
 import { ApolloClient, InMemoryCache, from } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/client/link/error';
@@ -22,9 +23,13 @@ const authLink = setContext((_, { headers }: any) => {
 const errorLink = onError(({ graphQLErrors, networkError }: any) => {
   if (graphQLErrors) {
     graphQLErrors.forEach(({ message, extensions }: any) => {
-      if (extensions?.code === 'UNAUTHENTICATED') {
-        console.warn('Unauthorized! Login failed.');
-        throw new Error('Invalid credentials. Please try again.');
+      if (extensions?.code === 'UNAUTHENTICATED' || message === 'Invalid token') {
+        console.warn('Unauthorized! Invalid token.');
+        logout();
+
+        window.location.href = '/auth/login';
+        
+        throw new Error('Invalid credentials. Please log in again.');
       } else {
         throw new Error(message);
       }

@@ -1,26 +1,35 @@
+/* eslint-disable react/no-unescaped-entities */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react/react-in-jsx-scope */
 "use client";
-import { useState } from "react";
-import { GET_LISTING_BY_ID } from "@/application/graphql/queries";
-import { useQuery } from "@apollo/client";
+import { useEffect, useState } from "react";
+import { ADD_REVIEW, GET_LISTING_BY_ID } from "@/application/graphql/queries";
+import { useMutation, useQuery } from "@apollo/client";
 import { useSearchParams } from "next/navigation";
+import Dialog from "@/presentation/components/common/Dialog";
 
 const ListingDetails = () => {
   const searchParams = useSearchParams();
   const listingId = searchParams.get("id");
-  const { data, loading, error } = useQuery(GET_LISTING_BY_ID, {
+  const { data, loading, error, refetch } = useQuery(GET_LISTING_BY_ID, {
     variables: { id: listingId },
     skip: !listingId,
   });
   const listing = data?.getListing;
 
-  const images = [
-    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NzEyNjZ8MHwxfHNlYXJjaHwxfHxoZWFkcGhvbmV8ZW58MHwwfHx8MTcyMTMwMzY5MHww&ixlib=rb-4.0.3&q=80&w=1080",
-    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NzEyNjZ8MHwxfHNlYXJjaHwxfHxoZWFkcGhvbmV8ZW58MHwwfHx8MTcyMTMwMzY5MHww&ixlib=rb-4.0.3&q=80&w=1080",
-    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NzEyNjZ8MHwxfHNlYXJjaHwxfHxoZWFkcGhvbmV8ZW58MHwwfHx8MTcyMTMwMzY5MHww&ixlib=rb-4.0.3&q=80&w=1080",
-    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NzEyNjZ8MHwxfHNlYXJjaHwxfHxoZWFkcGhvbmV8ZW58MHwwfHx8MTcyMTMwMzY5MHww&ixlib=rb-4.0.3&q=80&w=1080",
-  ];
-  const [mainImage, setMainImage] = useState(images[0]);
+  const [images, setImages] = useState<string[]>([]);
+  const [mainImage, setMainImage] = useState(listing?.images);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [selectedReviews, setSelectedReviews] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (listing?.images?.length > 0) {
+      setImages(listing.images);
+      setMainImage(listing.images[0]);
+    }
+  }, [listing]);
 
   if (!listing) return <p>Listing not found.</p>;
   if (loading) return <p>Loading...</p>;
@@ -33,7 +42,7 @@ const ListingDetails = () => {
           <div className="w-full md:w-1/2 px-4 mb-8">
             <img src={mainImage} alt="Product" className="w-full h-auto rounded-lg shadow-md mb-4" />
             <div className="flex gap-4 py-4 justify-center overflow-x-auto">
-              {images.map((img, index) => (
+              {images.map((img: string | undefined, index: number) => (
                 <img
                   key={index}
                   src={img}
@@ -71,8 +80,8 @@ const ListingDetails = () => {
             </div>
             <p className="text-gray-700 mb-6">{listing.description}</p>
             <div className="flex space-x-4 mb-6">
-              <button className="bg-indigo-600 flex gap-2 items-center text-white px-6 py-2 rounded-md hover:bg-indigo-700">Favorilere Ekle</button>
-              <button className="bg-gray-200 flex gap-2 items-center text-gray-800 px-6 py-2 rounded-md hover:bg-gray-300">Bize Ulaşın</button>
+              <button onClick={() => setReviewDialogOpen(true)} className="bg-indigo-600 flex gap-2 items-center text-white px-6 py-2 rounded-md hover:bg-indigo-700">Yorum Ekle</button>
+              <button onClick={() => { setSelectedReviews(listing.reviews); setDialogOpen(true); }} className="bg-gray-200 flex gap-2 items-center text-gray-800 px-6 py-2 rounded-md hover:bg-gray-300">Yorumları Gör</button>
             </div>
             <div>
               <h3 className="text-lg font-semibold mb-2">Listing Details:</h3>
@@ -86,8 +95,103 @@ const ListingDetails = () => {
           </div>
         </div>
       </div>
+
+      {dialogOpen && selectedReviews && (
+        <Dialog
+          position={{ content: 'center', items: 'start' }}
+          templete={<ReviewsPage data={selectedReviews} />}
+          onClose={() => setDialogOpen(false)}
+          width="md"
+          height="xl"
+        />
+      )}
+
+      {reviewDialogOpen && (
+        <Dialog
+          position={{ content: 'center', items: 'start' }}
+          templete={<AddReviewForm listingId={listingId} onClose={() => setReviewDialogOpen(false)} refetch={refetch} />}
+          onClose={() => setReviewDialogOpen(false)}
+          width="md"
+          height="lg"
+        />
+      )}
     </div>
   );
 };
+
+
+
+export const ReviewsPage = ({ data }: { data: any[] }) => {
+  return (
+    <div className="p-4">
+      <h2 className="text-2xl font-semibold mb-4">Yorumlar</h2>
+      {data.length > 0 ? (
+        <ul className="space-y-4">
+          {data.map((review, index) => (
+            <li key={index} className="border-b pb-4">
+              <p className="text-gray-900 font-semibold">Kullanıcı: {review.userId}</p>
+              <p className="text-yellow-500">
+                {"⭐".repeat(review.rating)} ({review.rating}/5)
+              </p>
+              <p className="text-gray-700">Yorum: "{review.comment}"</p>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-gray-500">Henüz yorum yapılmamış.</p>
+      )}
+    </div>
+  );
+};
+
+export const AddReviewForm = ({ listingId, onClose, refetch }: { listingId: string | null; onClose: () => void; refetch: () => void }) => {
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState("");
+  const [addReview, { loading, error }] = useMutation(ADD_REVIEW);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await addReview({ variables: { listingId, rating, comment } });
+    refetch();
+    onClose();
+  };
+
+  return (
+    <div className="p-4">
+      <h2 className="text-2xl font-semibold mb-4">Yorum Ekle</h2>
+      {error && <p className="text-red-500">Hata: {error.message}</p>}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <label className="block">
+          <span className="text-gray-700">Puan (1-5)</span>
+          <input
+            type="number"
+            min="1"
+            max="5"
+            value={rating}
+            onChange={(e) => setRating(Number(e.target.value))}
+            className="block w-full mt-1 p-2 border rounded"
+          />
+        </label>
+        <label className="block">
+          <span className="text-gray-700">Yorum</span>
+          <textarea
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            className="block w-full mt-1 p-2 border rounded"
+          ></textarea>
+        </label>
+        <div className="flex space-x-4">
+          <button type="submit" className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700">
+            Gönder
+          </button>
+          <button type="button" onClick={onClose} className="bg-gray-200 text-gray-800 px-6 py-2 rounded-md hover:bg-gray-300">
+            İptal
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
 
 export default ListingDetails;

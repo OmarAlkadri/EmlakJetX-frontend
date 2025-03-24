@@ -171,7 +171,7 @@ export const NavBarEmployee = () => {
                                 </Link>
                             </li>
                             <li className="flex items-center p-1 text-sm gap-x-2 text-slate-600">
-                                <Link href="listings" className="block py-2 px-3 text-white bg-blue-700 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 md:dark:text-blue-500 dark:bg-blue-600 md:dark:bg-transparent" aria-current="page">
+                                <Link href="/dashboard/listings" className="block py-2 px-3 text-white bg-blue-700 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 md:dark:text-blue-500 dark:bg-blue-600 md:dark:bg-transparent" aria-current="page">
                                     listings
                                 </Link>
                             </li>

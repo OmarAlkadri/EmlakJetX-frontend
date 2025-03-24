@@ -95,7 +95,7 @@ export const SEARCH_LISTINGS = gql`
 export const CREATE_LISTING = gql`
   mutation CreateListing($data: CreateListingDto!) {
     createListing(data: $data) {
-      id
+      _id
       title
       city
       price
@@ -151,7 +151,7 @@ export const DELETE_LISTING = gql`
 export const ADD_REVIEW = gql`
   mutation AddReview($listingId: String!, $comment: String!, $rating: Float!) {
     addReview(listingId: $listingId, comment: $comment, rating: $rating) {
-      id
+      _id
       title
     }
   }
@@ -176,7 +176,7 @@ export const GET_ALL_USERS = gql`
 export const GET_USER_BY_ID = gql`
   query GetUserById($id: String!) {
     getUserById(id: $id) {
-      id
+      _id
       name
       email
 
@@ -197,7 +197,6 @@ export const UNFAVORITE_LISTING = gql`
 mutation RemoveFavorite($listingId: ObjectID!) {
   removeFavorite(listingId: $listingId) {
     _id
-
   }
 }
 `;

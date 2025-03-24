@@ -30,7 +30,7 @@ export default function RegisterPage() {
 
       if (response.data.register.accessToken) {
         localStorage.setItem("authToken", response.data.register.accessToken);
-        router.push("/dashboard/listings");
+        router.push("/");
 
         toast.info('🦄 Wow so easy!', {
           position: "top-right",

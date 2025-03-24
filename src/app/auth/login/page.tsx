@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from "react-hook-form";
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
@@ -17,6 +17,7 @@ type LoginFormInputs = {
 const LoginPage = () => {
     const { login, user } = useAuth();
     const router = useRouter();
+    const [loding, setLoding] = useState(false);
 
     const {
         register,
@@ -37,19 +38,20 @@ const LoginPage = () => {
         } else {
             setError("email", { type: "manual", message: "No matching role for redirection." });
         }
-    }, [user])
+    }, [user]);
+
     const onSubmit = async (data: LoginFormInputs) => {
         try {
+            setLoding(true)
             await login(data);
-
-
+            setLoding(false)
         } catch (error: any) {
             setError("email", { type: "manual", message: error.message || "Invalid credentials. Please try again." });
         }
     };
 
     return (
-        <Loader loaded={!isSubmitting} onlySpinner={false}>
+        <Loader loaded={!loding} onlySpinner={false}>
             <div className='w-full h-screen flex justify-center items-center'>
                 <section className="bg-gray-50 dark:bg-gray-900 w-full max-w-md p-6 rounded-lg shadow-lg">
                     <h1 className="text-xl font-bold text-gray-900 text-center mb-4">
@@ -104,7 +106,7 @@ const LoginPage = () => {
                             </button>
 
                             <Link
-                                href={'/register'}
+                                href={'/auth/register'}
                                 className="w-full text-white bg-gray-600 hover:bg-gray-700 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                             >
                                 Sign Up

@@ -7,6 +7,7 @@ import { listingCard } from '../../../utils/types';
 import { useRouter } from 'next/navigation';
 import { Icon } from '@iconify/react/dist/iconify.js';
 import { useAuth } from '@/contexts/AuthContext';
+import { useEffect, useState } from 'react';
 
 interface ListingCardProps {
   listingCard: listingCard;
@@ -15,30 +16,57 @@ interface ListingCardProps {
 const ListingCard: React.FC<ListingCardProps> = ({ listingCard }) => {
   const router = useRouter();
   const { user } = useAuth();
+  const [IsBoolean, setIsBoolean] = useState(false);
 
-  const [getFavorite, { data }] = useLazyQuery(GET_FAVORITE, {
+  const [getFavorite, { data, loading, refetch }] = useLazyQuery(GET_FAVORITE, {
     variables: { listingId: listingCard._id },
+    onCompleted: (data) => {
+      setIsBoolean(data?.getFavorite?._id?.toString() === listingCard._id?.toString())
+    },
   });
 
-  const [unfavoriteListing] = useMutation(UNFAVORITE_LISTING);
-  const [favoriteListing] = useMutation(ADD_FAVORITE);
+  useEffect(() => {
+    getFavorite()
+  }, []);
+
+  const [favoriteListing] = useMutation(ADD_FAVORITE, {
+    onError: (error) => {
+      console.error("Error in favorite mutation:", error);
+    }
+  });
+
+  const [unfavoriteListing] = useMutation(UNFAVORITE_LISTING, {
+    onError: (error) => {
+      console.error("Error in unfavorite mutation:", error);
+    }
+  });
 
   const handleFavorite = async () => {
-    await favoriteListing({ variables: { listingId: listingCard._id } });
-    getFavorite();
+    try {
+      await favoriteListing({ variables: { listingId: listingCard._id } });
+      setIsBoolean(true);
+
+    } catch (error) {
+      console.error("Error favoriting listing:", error);
+    }
   };
 
   const handleUnfavorite = async () => {
-    await unfavoriteListing({ variables: { listingId: listingCard._id } });
-    getFavorite();
+    try {
+      await unfavoriteListing({ variables: { listingId: listingCard._id } });
+      setIsBoolean(false);
+    } catch (error) {
+      console.error("Error unfavoriting listing:", error);
+    }
   };
 
+  if (loading) return <p className="text-center text-gray-500">Loading...</p>;
   return (
     <div key={`${listingCard._id}`} className="flex max-w-full h-[190px] mb-4">
       <div className="flex flex-col h-full w-[255.85px] duration-500 hover:scale-105 hover:shadow-xl">
         <div className="flex items-center h-[143px] justify-center group backdrop-opacity-100">
           <img
-            src={listingCard.images?.[0] ?? "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NzEyNjZ8MHwxfHNlYXJjaHwxfHxoZWFkcGhvbmV8ZW58MHwwfHx8MTcyMTMwMzY5MHww&ixlib=rb-4.0.3&q=80&w=1080"}
+            src={listingCard.images?.[0]}
             alt="image"
             className="relative w-full h-[143px] object-cover"
           />
@@ -47,28 +75,22 @@ const ListingCard: React.FC<ListingCardProps> = ({ listingCard }) => {
               <div
                 className="flex flex-col hover:scale-105 group/detail cursor-pointer items-center justify-center"
                 onClick={() => {
-                  if (data?.getFavorite?._id?.toString() === listingCard._id?.toString()) {
+                  if (IsBoolean) {
                     handleUnfavorite();
                   } else {
                     handleFavorite();
                   }
                 }}
               >
+
                 <Icon
-                  icon={data?.getFavorite?._id?.toString() === listingCard._id?.toString() ? 'material-symbols-light:favorite-rounded' : 'material-symbols-light:favorite-outline-rounded'}
+                  icon={IsBoolean ? 'material-symbols-light:favorite-rounded' : 'material-symbols-light:favorite-outline-rounded'}
                   width="30"
                   height="30"
                   style={{ color: '#e15151' }}
-                  onClick={() => {
-                    if (data?.getFavorite?._id?.toString() === listingCard._id?.toString()) {
-                      handleUnfavorite();
-                    } else {
-                      handleFavorite();
-                    }
-                  }}
                 />
                 <p className="text-slate-300 font-[Eudoxus_Sans] text-[12px] font-medium group-hover/detail:text-white">
-                  {data?.getFavorite?._id?.toString() === listingCard._id?.toString()
+                  {IsBoolean
                     ? 'Remove from Favorite'
                     : 'Add to Favorite'}
                 </p>
@@ -99,10 +121,7 @@ const ListingCard: React.FC<ListingCardProps> = ({ listingCard }) => {
             className="cursor-pointer flex items-center h-full group/download hover:fill-blue-500"
             onClick={() => router.push(`/dashboard/listing/${listingCard._id}`)}
           >
-            <svg className="w-6 h-6 group-hover/download:fill-blue-500" xmlns="http://www.w3.org/2000/svg" width="1.2rem" height="1.2rem" fill="black" viewBox="0 0 20 20">
-              <path d="M17 12v5H3v-5H1v5a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5z"></path>
-              <path d="M15 9h-4V1H9v8H5l5 6z"></path>
-            </svg>
+            <Icon icon="material-symbols-light:add-link-rounded" width="24" height="24" />
           </div>
         </div>
       </div>

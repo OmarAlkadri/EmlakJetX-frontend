@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation, useQuery } from "@apollo/client";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -9,6 +10,7 @@ import { CREATE_LISTING, UPDATE_LISTING, GET_LISTING_BY_ID } from "@/application
 import ImageUpload from "@/presentation/components/ListingCard/ImageUpload";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { useAuth } from "@/contexts/AuthContext";
 
 export interface Review {
   userId: string;
@@ -27,7 +29,6 @@ export interface ListingFormData {
   images: string[];
   reviews: Review[];
   userId: any;
-  DateofPublication: Date | null;
 }
 
 const ListingForm = () => {
@@ -36,9 +37,9 @@ const ListingForm = () => {
     handleSubmit,
     reset,
     setValue,
-    getValues,
     formState: { errors },
   } = useForm<ListingFormData>();
+  const { user } = useAuth();
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -58,32 +59,64 @@ const ListingForm = () => {
         setValue(key as keyof ListingFormData, data.getListing[key]);
       });
 
-      if (data.getListing.DateofPublication) {
-        setValue("DateofPublication", new Date(data.getListing.DateofPublication));
-      }
+
     }
     if (!listingId) {
       reset();
     }
-  }, [listingId, data, setValue]);
+  }, [listingId, data, setValue, reset]);
+
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const handleUpload = async () => {
+    if (selectedFiles.length === 0) return [];
+
+    const uploadedUrls: string[] = [];
+    setLoading(true);
+
+    try {
+      for (const file of selectedFiles) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await response.json();
+        if (data?.url) {
+          uploadedUrls.push(data.url);
+        }
+      }
+    } catch (err) {
+      console.error('Error uploading images:', err);
+    } finally {
+      setLoading(false);
+    }
+
+    return uploadedUrls;
+  };
 
   const onSubmit = async (formData: ListingFormData) => {
+    const images = await handleUpload()
     const sanitizedData = {
       title: formData.title,
-      DateofPublication: formData.DateofPublication,
+      DateofPublication: new Date(),
       description: formData.description,
-      price: formData.price,
+      price: Number(formData.price),
       city: formData.city,
       district: formData.district,
-      rooms: formData.rooms,
-      area: formData.area,
-      images: formData.images || [],
+      rooms: Number(formData.rooms),
+      area: Number(formData.area),
+      images: images || [],
       reviews: formData.reviews?.map(({ userId, comment, rating }) => ({
-        userId: userId,
+        userId,
         comment,
-        rating,
+        rating: Number(rating),
       })) || [],
-      userId: formData.userId?._id || formData.userId,
+      userId: String(user?._id),
     };
 
     try {
@@ -100,9 +133,6 @@ const ListingForm = () => {
   };
 
 
-  if (queryLoading) return <p>Loading...</p>;
-  if (queryError) return <p className="text-red-500">Error loading listing</p>;
-
   return (
     <div className="p-4 space-y-4 max-w-3xl mx-auto">
       <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
@@ -111,14 +141,22 @@ const ListingForm = () => {
         </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {["title", "description", "price", "city", "district", "rooms", "area"].map((name) => (
+          {[
+            { name: "title", type: "text" },
+            { name: "description", type: "text" },
+            { name: "price", type: "number" },
+            { name: "city", type: "text" },
+            { name: "district", type: "text" },
+            { name: "rooms", type: "number" },
+            { name: "area", type: "number" },
+          ].map(({ name, type }) => (
             <div key={name}>
               <label htmlFor={name} className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                 {name.charAt(0).toUpperCase() + name.slice(1)}
               </label>
               <input
                 id={name}
-                type="text"
+                type={type}
                 {...register(name as keyof ListingFormData, { required: `${name} is required` })}
                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 placeholder={name.charAt(0).toUpperCase() + name.slice(1)}
@@ -128,25 +166,14 @@ const ListingForm = () => {
               )}
             </div>
           ))}
-
-          <div>
-            <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Date of Publication</label>
-            <DatePicker
-              selected={getValues("DateofPublication")}
-              onChange={(date) => setValue("DateofPublication", date)}
-              className="border rounded px-3 py-2 w-full"
-              isClearable
-              placeholderText="Tarih seçin"
-            />
-          </div>
         </div>
 
-        <ImageUpload onUpload={(uploadedImages) => setValue("images", uploadedImages)} />
+        <ImageUpload setSelectedFiles={setSelectedFiles} selectedFiles={selectedFiles} />
 
         <button
           type="submit"
           className={`text-white w-full px-5 py-2.5 text-center font-medium rounded-lg text-sm focus:outline-none ${createLoading || updateLoading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300"}`}
-          disabled={createLoading || updateLoading}
+          disabled={createLoading || updateLoading || loading}
         >
           {listingId ? (updateLoading ? "Updating..." : "Update Listing") : (createLoading ? "Submitting..." : "Create Listing")}
         </button>
@@ -155,6 +182,7 @@ const ListingForm = () => {
       </form>
     </div>
   );
+
 };
 
 export default ListingForm;

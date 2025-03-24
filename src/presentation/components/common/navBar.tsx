@@ -94,7 +94,7 @@ export const NavBar = () => {
                                     <div className="flex items-center">Dark</div>
                                 </li>
                                 <Link
-                                    href="auth/login"
+                                    href="/auth/login"
                                     className="block px-4 py-2 text-sm text-gray-700"
                                     role="menuitem"
                                     tabIndex={-1}
@@ -113,7 +113,7 @@ export const NavBar = () => {
                                 </Link>
                             </li>
                             <li className="flex items-center p-1 text-sm gap-x-2 text-slate-600">
-                                <Link href="dashboard/reservations" className="block py-2 px-3 text-white bg-blue-700 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 md:dark:text-blue-500 dark:bg-blue-600 md:dark:bg-transparent" aria-current="page">
+                                <Link href="/dashboard/reservations" className="block py-2 px-3 text-white bg-blue-700 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 md:dark:text-blue-500 dark:bg-blue-600 md:dark:bg-transparent" aria-current="page">
                                     add
                                 </Link>
                             </li>
@@ -136,7 +136,7 @@ export const NavBar = () => {
                             <li className="flex items-center p-1 pt-2 text-sm gap-x-2 text-slate-600">
 
                                 <Link
-                                    href="auth/login"
+                                    href="/auth/login"
                                     className="cursor-pointer text-white dark:text-black bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-white dark:hover:bg-gray-300 dark:focus:ring-gray-700 dark:border-gray-500"                            >
                                     LogIn
                                 </Link>
