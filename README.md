@@ -123,7 +123,9 @@ You can deploy this app on **Vercel**, **Netlify**, or any hosting provider supp
 
 To test the login functionality, use the following credentials:
 
-- **Email:** madonna67@yahoo.com
+- **Email:** Admin@gamil.com
+- **Email:** Employee@gamil.com
+
 - **Password:** 12345678
 
 ## License
