@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { logout } from '@/app/api/auth/logout';
-import { ApolloClient, InMemoryCache, from } from '@apollo/client';
+import { ApolloClient, InMemoryCache, createHttpLink, from } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/client/link/error';
-import createUploadLink from "apollo-upload-client/createUploadLink.mjs";
 
-const uploadLink = createUploadLink({
+const uploadLink = createHttpLink({
   uri: 'https://emlakjetx-backend.onrender.com/graphql',
   credentials: 'include',
 });
