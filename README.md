@@ -119,6 +119,13 @@ pnpm start  # or npm run start
 
 You can deploy this app on **Vercel**, **Netlify**, or any hosting provider supporting Next.js.
 
+## Test Login Credentials
+
+To test the login functionality, use the following credentials:
+
+- **Email:** madonna67@yahoo.com
+- **Password:** 12345678
+
 ## License
 
 This project is licensed under the MIT License.
