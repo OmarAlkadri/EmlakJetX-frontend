@@ -72,7 +72,8 @@ const ListingCard: React.FC<ListingCardProps> = ({ listingCard }) => {
           />
           <div className="absolute hidden items-center bg-gradient-to-t from-black w-full h-full group-hover:flex transform duration-500 top-0">
             <div className="flex justify-center w-full justify-evenly">
-              <div
+
+              {user && <div
                 className="flex flex-col hover:scale-105 group/detail cursor-pointer items-center justify-center"
                 onClick={() => {
                   if (IsBoolean) {
@@ -94,7 +95,7 @@ const ListingCard: React.FC<ListingCardProps> = ({ listingCard }) => {
                     ? 'Remove from Favorite'
                     : 'Add to Favorite'}
                 </p>
-              </div>
+              </div>}
               <div
                 className="flex flex-col hover:scale-105 group/detail cursor-pointer items-center justify-center"
                 onClick={() => router.push(`/dashboard/listing?id=${listingCard._id}`)}
@@ -117,12 +118,12 @@ const ListingCard: React.FC<ListingCardProps> = ({ listingCard }) => {
               <div>{listingCard.district}, {listingCard.city} - {listingCard.area} m²</div>
             </div>
           </div>
-          <div
+          {user && <div
             className="cursor-pointer flex items-center h-full group/download hover:fill-blue-500"
             onClick={() => router.push(`/dashboard/listing/${listingCard._id}`)}
           >
             <Icon icon="material-symbols-light:add-link-rounded" width="24" height="24" />
-          </div>
+          </div>}
         </div>
       </div>
     </div>
