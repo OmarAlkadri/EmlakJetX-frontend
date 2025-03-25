@@ -4,6 +4,8 @@
 
 This is the frontend application for the **Real Estate Listings** project, built with **Next.js**. It interacts with a **NestJS** backend using **GraphQL** and **MongoDB**.
 
+You can access the live project at: [https://emlak-jet-x-frontend.vercel.app](https://emlak-jet-x-frontend.vercel.app)
+
 ## Features
 
 - **User Authentication** (Register/Login)
