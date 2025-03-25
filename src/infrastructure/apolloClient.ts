@@ -6,7 +6,7 @@ import { onError } from '@apollo/client/link/error';
 import createUploadLink from "apollo-upload-client/createUploadLink.mjs";
 
 const uploadLink = createUploadLink({
-  uri: 'http://localhost:3030/graphql',
+  uri: 'https://emlakjetx-backend.onrender.com/graphql',
   credentials: 'include',
 });
 
